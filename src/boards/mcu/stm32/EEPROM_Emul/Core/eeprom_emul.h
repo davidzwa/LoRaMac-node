@@ -56,7 +56,7 @@
 #include "stm32l4xx_ll_crc.h"
 #include "stm32l4xx_ll_bus.h"
 #if defined(RECOVERY_TEST)
-#include "stm32l4xx_ll_rtc.h"
+#include "stm32f4xx_ll_rtc.h"
 #endif
 
 /** @addtogroup EEPROM_Emulation
