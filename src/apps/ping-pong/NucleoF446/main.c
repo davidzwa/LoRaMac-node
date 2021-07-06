@@ -21,6 +21,7 @@
  * \author    Gregory Cristian ( Semtech )
  */
 #include <string.h>
+#include "stdio.h"
 #include "board.h"
 #include "gpio.h"
 #include "delay.h"
@@ -162,6 +163,20 @@ void OnRxTimeout( void );
  */
 void OnRxError( void );
 
+#define FIRMWARE_VERSION                            0x01020000 // 1.2.0.0
+
+#define GITHUB_VERSION                              0x05000000 // 5.0.0.0
+
+void DisplayAppInfo( const char* appName, const Version_t* appVersion, const Version_t* gitHubVersion )
+{
+    printf( "\n###### ===================================== ######\n\n" );
+    printf( "Application name   : %s\n", appName );
+    printf( "Application version: %d.%d.%d\n", appVersion->Fields.Major, appVersion->Fields.Minor, appVersion->Fields.Patch );
+    printf( "GitHub base version: %d.%d.%d\n", gitHubVersion->Fields.Major, gitHubVersion->Fields.Minor, gitHubVersion->Fields.Patch );
+    printf( "\n###### ===================================== ######\n\n" );
+}
+
+
 /**
  * Main application entry point.
  */
@@ -173,6 +188,13 @@ int main( void )
     // Target board initialization
     BoardInitMcu( );
     BoardInitPeriph( );
+    
+    const Version_t appVersion = { .Value = FIRMWARE_VERSION };
+    const Version_t gitHubVersion = { .Value = GITHUB_VERSION };
+    DisplayAppInfo( "periodic-uplink-lpp", 
+                    &appVersion,
+                    &gitHubVersion );
+
 
     // Radio initialization
     RadioEvents.TxDone = OnTxDone;
@@ -244,6 +266,7 @@ int main( void )
                             Buffer[i] = i - 4;
                         }
                         DelayMs( 1 );
+                        printf("PINGED\n\r");
                         Radio.Send( Buffer, BufferSize );
                     }
                     else if( strncmp( ( const char* )Buffer, ( const char* )PingMsg, 4 ) == 0 )
@@ -280,6 +303,7 @@ int main( void )
                         }
                         DelayMs( 1 );
                         Radio.Send( Buffer, BufferSize );
+                        printf("PONGED\n\r");
                     }
                     else // valid reception but not a PING as expected
                     {    // Set device as master and start again
@@ -295,6 +319,7 @@ int main( void )
             // Indicates on a LED that we have sent a PONG [Slave]
             GpioToggle( &Led2 );
             Radio.Rx( RX_TIMEOUT_VALUE );
+            printf("TX\n\r");
             State = LOWPOWER;
             break;
         case RX_TIMEOUT:
