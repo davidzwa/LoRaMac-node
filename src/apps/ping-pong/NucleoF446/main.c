@@ -113,7 +113,7 @@ typedef enum
     TX_TIMEOUT,
 }States_t;
 
-#define RX_TIMEOUT_VALUE                            1000
+#define RX_TIMEOUT_VALUE                            1
 #define BUFFER_SIZE                                 64 // Define the payload size here
 
 const uint8_t PingMsg[] = "PING";
@@ -191,10 +191,11 @@ int main( void )
     
     const Version_t appVersion = { .Value = FIRMWARE_VERSION };
     const Version_t gitHubVersion = { .Value = GITHUB_VERSION };
-    DisplayAppInfo( "periodic-uplink-lpp", 
+    DisplayAppInfo( "pingh-pongh", 
                     &appVersion,
                     &gitHubVersion );
 
+    printf("Radio initializing\n");
 
     // Radio initialization
     RadioEvents.TxDone = OnTxDone;
@@ -205,7 +206,19 @@ int main( void )
 
     Radio.Init( &RadioEvents );
 
+    const RadioState_t state = Radio.GetStatus();
+    printf("Radio state %d", state);
+
+    printf("Radio init done\n");
+
+    state = Radio.GetStatus();
     Radio.SetChannel( RF_FREQUENCY );
+
+    printf("Radio state %d", state);
+
+    printf("Radio set channel to %d done\n", RF_FREQUENCY);
+
+    printf("Radio state %d", state);
 
 #if defined( USE_MODEM_LORA )
 
@@ -239,7 +252,12 @@ int main( void )
     #error "Please define a frequency band in the compiler options."
 #endif
 
+
+    printf("Radio started. Listening\n");
+
     Radio.Rx( RX_TIMEOUT_VALUE );
+
+    printf("Radio going into ping-pong mode.\n");
 
     while( 1 )
     {
@@ -323,6 +341,7 @@ int main( void )
             State = LOWPOWER;
             break;
         case RX_TIMEOUT:
+            printf("TX timeout\n\r");
         case RX_ERROR:
             if( isMaster == true )
             {
@@ -345,6 +364,7 @@ int main( void )
             State = LOWPOWER;
             break;
         case TX_TIMEOUT:
+            printf("tx\n");
             Radio.Rx( RX_TIMEOUT_VALUE );
             State = LOWPOWER;
             break;
@@ -365,12 +385,14 @@ int main( void )
 
 void OnTxDone( void )
 {
+    printf("tx done\n");
     Radio.Sleep( );
     State = TX;
 }
 
 void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr )
 {
+    printf("rx done\n");
     Radio.Sleep( );
     BufferSize = size;
     memcpy( Buffer, payload, BufferSize );
@@ -381,18 +403,21 @@ void OnRxDone( uint8_t *payload, uint16_t size, int16_t rssi, int8_t snr )
 
 void OnTxTimeout( void )
 {
+    printf("tx timeout\n");
     Radio.Sleep( );
     State = TX_TIMEOUT;
 }
 
 void OnRxTimeout( void )
 {
+    printf("rx timeout\n");
     Radio.Sleep( );
     State = RX_TIMEOUT;
 }
 
 void OnRxError( void )
 {
+    printf("error\n");
     Radio.Sleep( );
     State = RX_ERROR;
 }
