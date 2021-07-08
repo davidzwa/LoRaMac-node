@@ -253,26 +253,26 @@ int main(void)
 
     printf("Radio started. Listening\n");
 
-    while (1)
-    {
-        // Send the next PING frame
-        Buffer[0] = 'P';
-        Buffer[1] = 'I';
-        Buffer[2] = 'N';
-        Buffer[3] = 'G';
-        // We fill the buffer with numbers for the payload
-        for (i = 4; i < BufferSize; i++)
-        {
-            Buffer[i] = i - 4;
-        }
-        
-        Radio.Send(Buffer, BufferSize);
-        DelayMs(1000);
-        printf("PINGED\n\r");
-        DelayMs(100);
-    }
-
     Radio.Rx(RX_TIMEOUT_VALUE);
+
+    // while (1)
+    // {
+    //     // Send the next PING frame
+    //     Buffer[0] = 'P';
+    //     Buffer[1] = 'I';
+    //     Buffer[2] = 'N';
+    //     Buffer[3] = 'G';
+    //     // We fill the buffer with numbers for the payload
+    //     for (i = 4; i < BufferSize; i++)
+    //     {
+    //         Buffer[i] = i - 4;
+    //     }
+        
+    //     Radio.Send(Buffer, BufferSize);
+    //     DelayMs(1000);
+    //     printf("PINGED\n\r");
+    //     DelayMs(100);
+    // }
 
     printf("Radio going into ping-pong mode.\n");
 
